@@ -113,10 +113,43 @@
   .toggle-sw.on .knob{left:18px;}
 
   .link-meta{color:var(--blue);font-weight:700;cursor:pointer;}
+  .alert-dup{display:flex;gap:12px;background:#FEF3E2;border:1.5px solid #F2D19A;border-radius:9px;padding:13px 15px;margin-bottom:14px;}
+  .alert-dup-ic{color:#E8A33D;font-size:17px;flex:0 0 auto;}
+  .alert-dup-title{font-size:12.5px;font-weight:800;color:#8A5A13;margin-bottom:3px;}
+  .alert-dup-text{font-size:11.5px;color:#8A5A13;line-height:1.55;}
+  .meta-editor{border:1px dashed var(--border);border-radius:8px;padding:10px 12px;margin-top:6px;}
+  .meta-editor .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .meta-chip-rm{background:#EAF0F5;color:var(--text);font-size:11px;font-weight:700;padding:4px 6px 4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:6px;}
+  .meta-chip-rm span{color:var(--text-soft2);font-weight:800;}
+  .add-chip{display:flex;gap:6px;}
+  .add-chip input{flex:1;border:1.5px solid var(--border);border-radius:6px;padding:6px 9px;font-size:11.5px;color:var(--text-soft2);background:#fff;}
+  .add-chip button{background:var(--blue-bg);color:var(--blue);font-size:11px;padding:6px 10px;border-radius:6px;}
   .link-meta.muted{color:var(--text-soft2);font-weight:600;}
   .ocr-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;}
   .ocr-pill.on{background:var(--green-bg);color:var(--green);}
   .ocr-pill.off{background:#EEF1F4;color:var(--text-soft2);}
+
+  /* Árbol de taxonomía */
+  .tree{display:flex;flex-direction:column;gap:1px;}
+  .t-row{display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:6px;}
+  .t-row:hover{background:#FAFBFC;}
+  .t-row.l1{padding-left:6px;}
+  .t-row.l2{padding-left:30px;}
+  .t-row.l3{padding-left:30px;}
+  .t-row.doc{padding-left:54px;}
+  .t-ic{font-size:13px;flex:0 0 auto;}
+  .t-ic.folder{color:#D6A325;}
+  .t-ic.doc{color:var(--text-soft2);}
+  .t-name{font-weight:800;color:var(--text);font-size:12.5px;}
+  .t-row.l2 .t-name,.t-row.l3 .t-name{font-weight:700;font-size:12px;}
+  .t-row.doc .t-name{font-weight:600;}
+  .t-spacer{flex:1;min-width:8px;}
+  .t-link{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:4px 9px;border-radius:6px;white-space:nowrap;cursor:pointer;}
+  .t-link.new{color:var(--green);background:var(--green-bg);}
+  .t-doc-cluster{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .t-row.new-row{background:var(--blue-bg);}
+  .t-row.new-folder-row{background:var(--green-bg);}
+  .tree-section{border-top:1px solid var(--border-soft);margin-top:4px;padding-top:10px;}
   .row-actions{display:flex;gap:10px;color:var(--blue);font-size:13px;}
 
   .tax-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text-soft);}
@@ -153,7 +186,7 @@
 <div class="app">
   <div class="topbar">
     <div class="brand">DIGITALIZADOR · FASE 2 <b>· PROTOTIPO 1 — LÍNEAS, PRODUCTOS Y TAXONOMÍA</b></div>
-    <div class="step-counter"><span id="stepNow">1</span> / <span id="stepTotal">8</span></div>
+    <div class="step-counter"><span id="stepNow">1</span> / <span id="stepTotal">10</span></div>
   </div>
 
   <div class="stage" id="stage">
@@ -213,18 +246,38 @@
               <div class="field-input" style="max-width:340px;">No. de crédito</div>
             </div>
             <div class="card hl" style="padding:24px;">
-              <div class="sec-title">2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 5 documentos</span></div>
-              <table class="tax">
-                <thead><tr><th>Documento</th><th>Tipo</th><th>Req.</th><th>Metadatos</th><th>OCR</th><th>Acciones</th></tr></thead>
-                <tbody>
-                  <tr><td class="doc-name">Identificación Oficial</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Comprobante de domicilio</td><td class="doc-type">Domicilio</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Recibos de Nómina (3 meses)</td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Buró de Crédito</td><td class="doc-type">Bancario</td><td><span class="toggle-sw"><span class="knob"></span></span></td><td><span class="link-meta muted">Sin metadatos</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">CURP</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                </tbody>
-              </table>
-              <div class="tax-foot"><span>5 documentos configurados · 4 requeridos · 1 opcional</span><button class="pill-btn primary" id="addDocBtn">+ Agregar documento</button></div>
+              <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 2 carpetas raíz · 7 documentos</span></span>
+                <button class="pill-btn outline" style="font-size:11.5px;padding:7px 14px;">+ Nueva carpeta</button>
+              </div>
+              <div class="tree">
+                <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Comprobante de domicilio</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">CURP</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta muted">Sin metadatos</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">02. Documentación del Garante</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Buró de Crédito</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw"><span class="knob"></span></span><span class="link-meta muted">Sin metadatos</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+
+                <div class="t-row l1 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Expediente Legal</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Recibos de Nómina (3 meses)</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Carátula del Contrato</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+              </div>
+              <div class="tax-foot"><span>7 documentos configurados · 6 requeridos · 1 opcional</span></div>
             </div>
           </div>
         </div>
@@ -241,7 +294,7 @@
       </div>
       <div class="side-panel">
         <div class="panel-title">Agregar documento</div>
-        <div class="panel-sub">Producto: Crédito Automotriz</div>
+        <div class="panel-sub">Crédito Automotriz <span style="color:var(--text-soft2);">/</span> Carpeta: <b>02. Documentación del Garante</b></div>
         <div class="tabs"><div class="tab active">Documento existente</div><div class="tab">Documento nuevo</div></div>
         <div class="search-input">🔍 Buscar en el catálogo...</div>
         <div class="catalog-pick sel"><div class="radio"></div><div><div class="cn">Estados de Cuenta (3 meses)</div><div class="ct">Bancario · usado en 9 productos</div></div></div>
@@ -266,15 +319,51 @@
       </div>
       <div class="side-panel">
         <div class="panel-title">Agregar documento</div>
-        <div class="panel-sub">Producto: Crédito Automotriz</div>
+        <div class="panel-sub">Crédito Automotriz <span style="color:var(--text-soft2);">/</span> Carpeta: <b>02. Documentación del Garante</b></div>
         <div class="tabs"><div class="tab">Documento existente</div><div class="tab active">Documento nuevo</div></div>
         <div class="field-label">Nombre del documento</div>
-        <div class="field-input" style="margin-bottom:14px;">Recibo de Nómina del Aval</div>
+        <div class="field-input" style="margin-bottom:10px;border-color:#F2D19A;">Recibo de Nómina</div>
+        <div class="alert-dup" style="margin-bottom:0;">
+          <span class="alert-dup-ic">⚠</span>
+          <div>
+            <div class="alert-dup-title">Documento similar encontrado</div>
+            <div class="alert-dup-text">Ya existe <b>"Recibos de Nómina (3 meses)"</b> en el catálogo, usado en 14 productos. Para no afectar a esos productos, su configuración no puede modificarse desde aquí.</div>
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-cancel" style="flex:1;">Es otro documento, continuar</button>
+          <button class="btn-save" style="flex:1;">Usar el existente</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="5">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Crédito Automotriz</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Crédito Automotriz <span style="color:var(--text-soft2);">/</span> Carpeta: <b>02. Documentación del Garante</b></div>
+        <div class="tabs"><div class="tab">Documento existente</div><div class="tab active">Documento nuevo</div></div>
+        <div class="field-label">Nombre del documento</div>
+        <div class="field-input" style="margin-bottom:6px;border-color:var(--green);">Recibo de Nómina del Aval</div>
+        <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:14px;">✓ No hay coincidencias en el catálogo</div>
         <div class="field-label">Tipo de documento</div>
         <div class="field-input" style="margin-bottom:14px;display:flex;justify-content:space-between;">Fiscal <span style="color:var(--text-soft2);">⌄</span></div>
         <div class="config-box" style="margin-top:6px;">
           <div class="field-label" style="margin-bottom:8px;">Configuración del documento</div>
           <div class="config-row"><span>Requiere metadatos</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+          <div class="meta-editor">
+            <div class="chips">
+              <span class="meta-chip-rm">Periodo de pago <span>✕</span></span>
+              <span class="meta-chip-rm">Empleador <span>✕</span></span>
+            </div>
+            <div class="add-chip"><input placeholder="Nombre del campo..."/><button>+ Agregar</button></div>
+          </div>
           <div class="config-row"><span>Requiere OCR</span><span class="toggle-sw"><span class="knob"></span></span></div>
           <div class="config-row"><span>Tiene vigencia</span><span class="toggle-sw on"><span class="knob"></span></span></div>
         </div>
@@ -286,7 +375,7 @@
       </div>
     </div>
 
-    <div class="screen" data-step="5">
+    <div class="screen" data-step="6">
       <div class="shell">
         <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
         <div class="main">
@@ -295,26 +384,78 @@
             <div class="crumb"><div class="back">←</div><a>Administración de líneas de negocio</a><span class="sep">›</span><span class="cur">Editar producto</span></div>
             <h1 style="margin:6px 0 16px;font-size:20px;">Crédito Automotriz</h1>
             <div class="card" style="padding:24px;">
-              <div class="sec-title">2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 6 documentos</span></div>
-              <table class="tax">
-                <thead><tr><th>Documento</th><th>Tipo</th><th>Req.</th><th>Metadatos</th><th>OCR</th><th>Acciones</th></tr></thead>
-                <tbody>
-                  <tr><td class="doc-name">Identificación Oficial</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Comprobante de domicilio</td><td class="doc-type">Domicilio</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Recibos de Nómina (3 meses)</td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">Buró de Crédito</td><td class="doc-type">Bancario</td><td><span class="toggle-sw"><span class="knob"></span></span></td><td><span class="link-meta muted">Sin metadatos</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr><td class="doc-name">CURP</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
-                  <tr class="hl"><td class="doc-name">Recibo de Nómina del Aval <span class="badge new" style="margin-left:6px;">Nuevo</span></td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
-                </tbody>
-              </table>
-              <div class="tax-foot"><span>6 documentos configurados · 5 requeridos · 1 opcional</span><button class="pill-btn primary">+ Agregar documento</button></div>
+              <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 2 carpetas raíz · 8 documentos</span></span>
+                <button class="pill-btn outline" style="font-size:11.5px;padding:7px 14px;">+ Nueva carpeta</button>
+              </div>
+              <div class="tree">
+                <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Comprobante de domicilio</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">CURP</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta muted">Sin metadatos</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">02. Documentación del Garante</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Buró de Crédito</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw"><span class="knob"></span></span><span class="link-meta muted">Sin metadatos</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc new-row"><span class="t-ic doc">📄</span><span class="t-name">Recibo de Nómina del Aval <span class="badge new" style="margin-left:4px;">Nuevo</span></span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+
+                <div class="t-row l1 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Expediente Legal</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Recibos de Nómina (3 meses)</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Carátula del Contrato</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+              </div>
+              <div class="tax-foot"><span>8 documentos configurados · 7 requeridos · 1 opcional</span></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="screen" data-step="6">
+    <div class="screen" data-step="7">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Administración de líneas de negocio</a><span class="sep">›</span><span class="cur">Editar producto</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Crédito Automotriz</h1>
+            <div class="card" style="padding:24px;">
+              <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 3 carpetas raíz · 8 documentos</span></span>
+                <button class="pill-btn outline" style="font-size:11.5px;padding:7px 14px;">+ Nueva carpeta</button>
+              </div>
+              <div class="tree">
+                <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span><div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div></div>
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">02. Documentación del Garante</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+
+                <div class="t-row l1 tree-section new-folder-row"><span class="t-ic folder">📁</span><span class="t-name">03. Documentación del Cotitular <span class="badge new" style="margin-left:4px;">Nueva carpeta</span></span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link new">+ Documento</span></div>
+                <div class="t-row" style="padding-left:54px;"><span style="font-size:11.5px;color:var(--text-soft2);font-style:italic;">Carpeta vacía — agrega un documento para empezar.</span></div>
+
+                <div class="t-row l1 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Expediente Legal</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="8">
       <div class="shell">
         <div class="sidebar"><div class="sb-ic">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic on">＋</div><div class="sb-ic">⚙</div></div>
         <div class="main">
@@ -340,7 +481,7 @@
       </div>
     </div>
 
-    <div class="screen" data-step="7">
+    <div class="screen" data-step="9">
       <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff;">
         <div style="max-width:480px;text-align:center;">
           <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Fin de la parte 1</div>
@@ -363,11 +504,13 @@
 const steps = [
   { tag:"INTRO", text:"Punto de partida del recorrido." },
   { tag:"PASO 1", text:"El administrador entra a <b>Administración de líneas de negocio</b>. Cada línea se expande para mostrar sus productos — aquí, Créditos con sus 11 productos." },
-  { tag:"PASO 2", text:"Al presionar <b>Editar</b> en Crédito Automotriz se abre el detalle del producto. La sección 1 muestra su clasificación, y la sección 2 muestra la <b>tabla de documentos</b> que este producto requiere, con su tipo, si es requerido, su configuración de metadatos y OCR." },
-  { tag:"PASO 3", text:"Al presionar <b>+ Agregar documento</b> se abre un panel con dos pestañas. En la pestaña <b>Documento existente</b>, el administrador busca en el catálogo global y elige uno ya definido, configurando si es requerido y si tiene vigencia para este producto en particular." },
-  { tag:"PASO 4", text:"Si el documento que necesita no existe todavía, cambia a la pestaña <b>Documento nuevo</b>. Aquí aparece un formulario para capturarlo: nombre, tipo, y su configuración técnica (metadatos, OCR). Al guardar, el documento se crea en el catálogo global y queda vinculado a este producto en un solo paso." },
-  { tag:"PASO 5", text:"La tabla del producto se actualiza con el documento recién creado, marcado como <b>Nuevo</b>." },
-  { tag:"PASO 6", text:"El <b>Catálogo de documentos</b> es independiente de cualquier producto. Aquí se administra la configuración técnica de cada documento, y se ve en cuántos productos está siendo usado actualmente." },
+  { tag:"PASO 2", text:"Al presionar <b>Editar</b> en Crédito Automotriz se abre el detalle del producto. La sección 2 muestra la <b>taxonomía</b>: el árbol de carpetas (Nivel 1, 2 y 3) donde se organizan los documentos que este producto requiere. Cada carpeta tiene sus propias acciones <b>+ Carpeta</b> y <b>+ Documento</b>, disponibles en cualquier nivel del árbol." },
+  { tag:"PASO 3", text:"Al presionar <b>+ Documento</b> en la carpeta '02. Documentación del Garante' se abre un panel con dos pestañas. En <b>Documento existente</b>, el administrador busca en el catálogo global y elige uno ya definido, configurando si es requerido y si tiene vigencia dentro de esta carpeta." },
+  { tag:"PASO 4", text:"Si escribe en <b>Documento nuevo</b> un nombre que ya existe en el catálogo, el sistema lo <b>detecta y avisa de inmediato</b>. Puede usar el documento existente, o continuar si en verdad es un documento distinto — pero nunca se sobrescribe la configuración del que ya existe." },
+  { tag:"PASO 5", text:"Al continuar con un nombre sin coincidencias, el formulario se completa: tipo de documento y, si requiere metadatos, el administrador define <b>qué campos</b> se van a capturar. Al guardar, el documento se crea en el catálogo global y queda vinculado a esta carpeta en un solo paso." },
+  { tag:"PASO 6", text:"El árbol se actualiza: el documento recién creado aparece dentro de '02. Documentación del Garante', marcado como <b>Nuevo</b>, junto con los metadatos que requiere." },
+  { tag:"PASO 7", text:"El botón <b>+ Carpeta</b> funciona igual en cualquier nivel. Aquí se creó '03. Documentación del Cotitular' como una carpeta nueva, lista para recibir su primer documento con la misma interacción ya conocida." },
+  { tag:"PASO 8", text:"El <b>Catálogo de documentos</b> es independiente de cualquier producto o carpeta. Aquí se administra la configuración técnica de cada documento, y se ve en cuántos productos está siendo usado actualmente." },
   { tag:"FIN", text:"Fin de esta parte del recorrido." }
 ];
 let current=0, playing=false, timer=null;
