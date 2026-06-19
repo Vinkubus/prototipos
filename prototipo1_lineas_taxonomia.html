@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Prototipo 1 — Administración de Líneas de Negocio y Taxonomía</title>
+<style>
+  :root{
+    --navy:#16233A; --blue:#2E86C1; --blue-dark:#236A9C; --blue-bg:#EAF3FB;
+    --green:#22A35E; --green-bg:#E8F8EF; --red:#D64545;
+    --page-bg:#F4F6F8; --border:#E4E8ED; --border-soft:#EEF1F4;
+    --text:#1F2937; --text-soft:#667085; --text-soft2:#9AA4B2; --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0F1B27;color:var(--text);}
+  .app{max-width:1220px;margin:0 auto;padding:22px 22px 90px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .brand{color:#fff;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;opacity:.65;}
+  .brand b{color:var(--blue);}
+  .step-counter{color:#fff;font-size:13px;opacity:.7;}
+
+  .stage{background:var(--page-bg);border-radius:10px;min-height:600px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .screen{position:absolute;top:0;right:0;bottom:0;left:0;display:none;}
+  .screen.show{display:block;}
+
+  .dots{display:flex;gap:6px;justify-content:center;margin:16px 0 10px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#3A4C5E;transition:.2s;cursor:pointer;}
+  .dot.active{background:var(--blue);width:20px;border-radius:4px;}
+
+  .caption{background:linear-gradient(180deg,#16242F,#0F1B27);border-radius:10px;margin-top:14px;padding:16px 20px;color:#fff;display:flex;gap:16px;align-items:flex-start;}
+  .caption .tag{flex:0 0 auto;background:var(--blue);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:5px;margin-top:1px;white-space:nowrap;}
+  .caption .text{font-size:13.5px;line-height:1.6;color:#E7ECF1;}
+  .caption .text b{color:#fff;}
+
+  .controls{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;}
+  .controls-left,.controls-right{display:flex;gap:8px;align-items:center;}
+  button{font-family:inherit;border:none;cursor:pointer;border-radius:7px;font-size:13px;font-weight:700;padding:10px 16px;transition:.15s;}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-ghost{background:#1E2E3D;color:#CBD5E1;}
+  .btn-ghost:hover{background:#28394A;}
+  .btn-ghost[disabled]{opacity:.35;cursor:not-allowed;}
+  .btn-play{background:var(--green);color:#fff;}
+  .btn-play.is-playing{background:#E8A33D;}
+
+  /* ===== Figma-style app shell ===== */
+  .shell{display:flex;height:100%;}
+  .sidebar{width:60px;background:var(--navy);flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding-top:18px;gap:16px;}
+  .sb-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#7C8AA0;font-size:15px;}
+  .sb-ic.on{background:#fff;color:var(--navy);}
+
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .header{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;}
+  .logo{font-size:20px;font-weight:800;color:var(--navy);font-style:italic;}
+  .user{display:flex;align-items:center;gap:10px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#D9E2EC;}
+  .user-meta{font-size:11.5px;line-height:1.4;color:var(--text-soft);}
+  .user-meta b{color:var(--text);font-size:12px;display:block;}
+  .logout{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:13px;}
+
+  .content{flex:1;overflow:auto;padding:24px 28px;}
+  .card{background:#fff;border-radius:12px;border:1px solid var(--border-soft);box-shadow:0 1px 3px rgba(16,24,40,.04);}
+
+  .crumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-soft);margin-bottom:6px;}
+  .crumb .back{width:24px;height:24px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .crumb a{color:var(--blue);font-weight:600;}
+  .crumb .sep{color:var(--text-soft2);}
+  .crumb .cur{color:var(--text);font-weight:700;}
+
+  .page-title{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+  .page-title h1{font-size:21px;margin:0 0 3px;color:var(--text);}
+  .page-title p{margin:0;font-size:12.5px;color:var(--text-soft);}
+
+  .pill-btn{border-radius:999px;padding:9px 18px;font-size:12.5px;}
+  .pill-btn.primary{background:var(--blue);color:#fff;}
+  .pill-btn.outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
+
+  .lob-card{padding:0;}
+  .lob-row{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border-soft);}
+  .lob-row:last-child{border-bottom:none;}
+  .lob-ic{width:30px;height:30px;border-radius:7px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .lob-name{font-weight:800;font-size:14.5px;color:var(--text);}
+  .badge{background:var(--blue-bg);color:var(--blue);font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;}
+  .badge.new{background:var(--green-bg);color:var(--green);}
+  .chev{margin-left:auto;color:var(--text-soft2);font-size:13px;}
+
+  .prod-row{display:flex;align-items:center;gap:8px;padding:13px 20px 13px 52px;border-bottom:1px solid var(--border-soft);background:#fff;}
+  .prod-row.hl{background:var(--blue-bg);}
+  .prod-row .name{font-weight:700;font-size:13px;color:var(--text);}
+  .prod-row .meta{font-size:12px;color:var(--text-soft2);}
+  .prod-row .time{margin-left:auto;font-size:11.5px;color:var(--text-soft2);}
+  .edit-pill{border:1.5px solid var(--blue);color:var(--blue);background:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 14px;display:flex;align-items:center;gap:5px;}
+
+  .lob-footer{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;font-size:12px;color:var(--text-soft);}
+
+  .sec-title{color:var(--blue);font-weight:800;font-size:14.5px;margin:0 0 14px;}
+  .field-grid{display:flex;gap:18px;margin-bottom:18px;}
+  .field-grid > div{flex:1;}
+  .field-label{font-size:11.5px;color:var(--text-soft);margin-bottom:6px;font-weight:600;}
+  .field-input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);background:#fff;}
+  .field-input.locked{background:#F4F6F8;color:var(--text-soft);display:flex;justify-content:space-between;align-items:center;}
+
+  table.tax{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.tax thead th{text-align:left;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft2);font-weight:800;padding:8px 10px;border-bottom:1.5px solid var(--border);}
+  table.tax tbody td{padding:10px 10px;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle;}
+  table.tax tbody tr.hl{background:var(--blue-bg);}
+  table.tax tbody tr:hover{background:#FAFBFC;}
+  .doc-name{font-weight:700;}
+  .doc-type{color:var(--text-soft);}
+
+  .toggle-sw{width:36px;height:20px;border-radius:999px;background:#D8DEE5;position:relative;display:inline-block;}
+  .toggle-sw.on{background:var(--blue);}
+  .toggle-sw .knob{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;}
+  .toggle-sw.on .knob{left:18px;}
+
+  .link-meta{color:var(--blue);font-weight:700;cursor:pointer;}
+  .link-meta.muted{color:var(--text-soft2);font-weight:600;}
+  .ocr-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;}
+  .ocr-pill.on{background:var(--green-bg);color:var(--green);}
+  .ocr-pill.off{background:#EEF1F4;color:var(--text-soft2);}
+  .row-actions{display:flex;gap:10px;color:var(--blue);font-size:13px;}
+
+  .tax-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text-soft);}
+
+  .side-panel{position:absolute;top:0;right:0;bottom:0;width:430px;background:#fff;box-shadow:-8px 0 30px rgba(16,24,40,.12);padding:22px 24px;overflow:auto;}
+  .panel-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;}
+  .panel-sub{font-size:12px;color:var(--text-soft);margin-bottom:18px;}
+  .tabs{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:16px;}
+  .tab{flex:1;text-align:center;padding:10px 0;font-size:12.5px;font-weight:700;color:var(--text-soft2);border-bottom:2.5px solid transparent;cursor:pointer;}
+  .tab.active{color:var(--blue);border-color:var(--blue);}
+
+  .search-input{border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-soft);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+  .catalog-pick{border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .catalog-pick.sel{border-color:var(--blue);background:var(--blue-bg);}
+  .catalog-pick .radio{width:16px;height:16px;border-radius:50%;border:2px solid #C7CFD8;flex:0 0 auto;}
+  .catalog-pick.sel .radio{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff;}
+  .catalog-pick .cn{font-size:12.5px;font-weight:700;color:var(--text);}
+  .catalog-pick .ct{font-size:10.5px;color:var(--text-soft2);}
+
+  .config-box{border-top:1px dashed var(--border);margin-top:14px;padding-top:14px;}
+  .config-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:12.5px;color:var(--text);}
+
+  .panel-actions{display:flex;gap:10px;margin-top:20px;}
+  .panel-actions button{flex:1;}
+  .btn-cancel{background:#fff;border:1.5px solid var(--border);color:var(--text-soft);}
+  .btn-save{background:var(--blue);color:#fff;}
+
+  @media(max-width:760px){.app{padding:14px;} .stage{min-height:520px;} .side-panel{width:100%;}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">DIGITALIZADOR · FASE 2 <b>· PROTOTIPO 1 — LÍNEAS, PRODUCTOS Y TAXONOMÍA</b></div>
+    <div class="step-counter"><span id="stepNow">1</span> / <span id="stepTotal">8</span></div>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <div class="screen show" data-step="0">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff;">
+        <div style="max-width:480px;text-align:center;">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--blue);font-weight:800;margin-bottom:10px;">RECORRIDO GUIADO · PARTE 1</div>
+          <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Líneas de negocio, productos y su taxonomía de documentos</div>
+          <div style="font-size:13.5px;color:var(--text-soft);line-height:1.6;">Este recorrido muestra cómo un administrador consulta un producto y configura los documentos que ese producto requiere. La creación de un producto nuevo se muestra en un segundo prototipo, por separado.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="1">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header">
+            <div class="logo">Actinver</div>
+            <div class="user"><div class="avatar"></div><div class="user-meta"><b>José López Pérez</b>Lunes 20 de enero 2025</div><div class="logout">⏻</div></div>
+          </div>
+          <div class="content">
+            <div class="page-title">
+              <div><h1>Administración de líneas de negocio</h1><p>Configura los productos y sus documentos requeridos</p></div>
+              <button class="pill-btn primary">+ Nueva línea de negocio</button>
+            </div>
+            <div class="card lob-card">
+              <div class="lob-row"><div class="lob-ic">📁</div><div class="lob-name">Contratos</div><span class="badge">3 productos</span><div class="chev">›</div></div>
+              <div class="lob-row"><div class="lob-ic">💲</div><div class="lob-name">Créditos</div><span class="badge">11 productos</span><div class="chev">⌄</div></div>
+              <div class="prod-row"><div class="name">Disposición Crédito Comercial Empresarial</div><span class="meta">| 3 docs</span><span class="time">hace 3 meses</span><button class="edit-pill">✎ Editar</button></div>
+              <div class="prod-row"><div class="name">Crédito LPS</div><span class="meta">| 4 docs</span><span class="time">hace 1 mes</span><button class="edit-pill">✎ Editar</button></div>
+              <div class="prod-row hl"><div class="name">Crédito Automotriz</div><span class="meta">| 5 docs</span><span class="time">hace 5 meses</span><button class="edit-pill">✎ Editar</button></div>
+              <div class="prod-row"><div class="name">Crédito Simple sin Garantía</div><span class="meta">| 29 docs</span><span class="time">hace 5 meses</span><button class="edit-pill">✎ Editar</button></div>
+              <div class="lob-footer"><span>11 productos configurados</span><button class="pill-btn outline">+ Nuevo producto</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="2">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div><div class="user"><div class="avatar"></div><div class="user-meta"><b>José López Pérez</b>Lunes 20 de enero 2025</div><div class="logout">⏻</div></div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Administración de líneas de negocio</a><span class="sep">›</span><span class="cur">Editar producto</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Crédito Automotriz</h1>
+            <div class="card" style="padding:24px;margin-bottom:18px;">
+              <div class="sec-title">1. Clasificación</div>
+              <div class="field-grid">
+                <div><div class="field-label">Línea de negocio</div><div class="field-input locked">Créditos 🔒</div></div>
+                <div><div class="field-label">Nombre del producto</div><div class="field-input">Automotriz</div></div>
+              </div>
+              <div class="field-label">Nombre del ID del expediente</div>
+              <div class="field-input" style="max-width:340px;">No. de crédito</div>
+            </div>
+            <div class="card hl" style="padding:24px;">
+              <div class="sec-title">2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 5 documentos</span></div>
+              <table class="tax">
+                <thead><tr><th>Documento</th><th>Tipo</th><th>Req.</th><th>Metadatos</th><th>OCR</th><th>Acciones</th></tr></thead>
+                <tbody>
+                  <tr><td class="doc-name">Identificación Oficial</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Comprobante de domicilio</td><td class="doc-type">Domicilio</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Recibos de Nómina (3 meses)</td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Buró de Crédito</td><td class="doc-type">Bancario</td><td><span class="toggle-sw"><span class="knob"></span></span></td><td><span class="link-meta muted">Sin metadatos</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">CURP</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                </tbody>
+              </table>
+              <div class="tax-foot"><span>5 documentos configurados · 4 requeridos · 1 opcional</span><button class="pill-btn primary" id="addDocBtn">+ Agregar documento</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="3">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Crédito Automotriz</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Producto: Crédito Automotriz</div>
+        <div class="tabs"><div class="tab active">Documento existente</div><div class="tab">Documento nuevo</div></div>
+        <div class="search-input">🔍 Buscar en el catálogo...</div>
+        <div class="catalog-pick sel"><div class="radio"></div><div><div class="cn">Estados de Cuenta (3 meses)</div><div class="ct">Bancario · usado en 9 productos</div></div></div>
+        <div class="catalog-pick"><div class="radio"></div><div><div class="cn">Autorización para solicitar reportes de crédito</div><div class="ct">Bancario · usado en 6 productos</div></div></div>
+        <div class="catalog-pick"><div class="radio"></div><div><div class="cn">Aprobación de Línea de Crédito</div><div class="ct">Bancario · usado en 4 productos</div></div></div>
+        <div class="config-box">
+          <div class="field-label" style="margin-bottom:8px;">Configuración para este producto</div>
+          <div class="config-row"><span>Requerido</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+          <div class="config-row"><span>Tiene vigencia</span><span class="toggle-sw"><span class="knob"></span></span></div>
+        </div>
+        <div class="panel-actions"><button class="btn-cancel">Cancelar</button><button class="btn-save">Vincular documento</button></div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="4">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Crédito Automotriz</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Producto: Crédito Automotriz</div>
+        <div class="tabs"><div class="tab">Documento existente</div><div class="tab active">Documento nuevo</div></div>
+        <div class="field-label">Nombre del documento</div>
+        <div class="field-input" style="margin-bottom:14px;">Recibo de Nómina del Aval</div>
+        <div class="field-label">Tipo de documento</div>
+        <div class="field-input" style="margin-bottom:14px;display:flex;justify-content:space-between;">Fiscal <span style="color:var(--text-soft2);">⌄</span></div>
+        <div class="config-box" style="margin-top:6px;">
+          <div class="field-label" style="margin-bottom:8px;">Configuración del documento</div>
+          <div class="config-row"><span>Requiere metadatos</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+          <div class="config-row"><span>Requiere OCR</span><span class="toggle-sw"><span class="knob"></span></span></div>
+          <div class="config-row"><span>Tiene vigencia</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+        </div>
+        <div class="config-box">
+          <div class="field-label" style="margin-bottom:8px;">Configuración para este producto</div>
+          <div class="config-row"><span>Requerido</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+        </div>
+        <div class="panel-actions"><button class="btn-cancel">Cancelar</button><button class="btn-save">Crear y vincular</button></div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="5">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div><div class="user"><div class="avatar"></div><div class="user-meta"><b>José López Pérez</b>Lunes 20 de enero 2025</div><div class="logout">⏻</div></div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Administración de líneas de negocio</a><span class="sep">›</span><span class="cur">Editar producto</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Crédito Automotriz</h1>
+            <div class="card" style="padding:24px;">
+              <div class="sec-title">2. Taxonomía de documentos <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 6 documentos</span></div>
+              <table class="tax">
+                <thead><tr><th>Documento</th><th>Tipo</th><th>Req.</th><th>Metadatos</th><th>OCR</th><th>Acciones</th></tr></thead>
+                <tbody>
+                  <tr><td class="doc-name">Identificación Oficial</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Comprobante de domicilio</td><td class="doc-type">Domicilio</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Recibos de Nómina (3 meses)</td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Buró de Crédito</td><td class="doc-type">Bancario</td><td><span class="toggle-sw"><span class="knob"></span></span></td><td><span class="link-meta muted">Sin metadatos</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">CURP</td><td class="doc-type">Identificación</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr class="hl"><td class="doc-name">Recibo de Nómina del Aval <span class="badge new" style="margin-left:6px;">Nuevo</span></td><td class="doc-type">Fiscal</td><td><span class="toggle-sw on"><span class="knob"></span></span></td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="row-actions">✎ 🗑</td></tr>
+                </tbody>
+              </table>
+              <div class="tax-foot"><span>6 documentos configurados · 5 requeridos · 1 opcional</span><button class="pill-btn primary">+ Agregar documento</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="6">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic on">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div><div class="user"><div class="avatar"></div><div class="user-meta"><b>José López Pérez</b>Lunes 20 de enero 2025</div><div class="logout">⏻</div></div></div>
+          <div class="content">
+            <div class="page-title">
+              <div><h1>Catálogo de documentos</h1><p>Configuración global, independiente de cualquier producto</p></div>
+              <button class="pill-btn primary">+ Nuevo documento</button>
+            </div>
+            <div class="card" style="padding:24px;">
+              <table class="tax">
+                <thead><tr><th>Documento</th><th>Metadatos</th><th>OCR</th><th>Usado en</th><th>Acciones</th></tr></thead>
+                <tbody>
+                  <tr><td class="doc-name">Identificación Oficial</td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="doc-type">11 productos</td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr class="hl"><td class="doc-name">Buró de Crédito</td><td><span class="link-meta muted">Sin metadatos</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="doc-type">3 productos</td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Comprobante de domicilio</td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill on">Habilitado</span></td><td class="doc-type">14 productos</td><td class="row-actions">✎ 🗑</td></tr>
+                  <tr><td class="doc-name">Recibo de Nómina del Aval</td><td><span class="link-meta">Configurado</span></td><td><span class="ocr-pill off">No aplica</span></td><td class="doc-type">1 producto</td><td class="row-actions">✎ 🗑</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="7">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff;">
+        <div style="max-width:480px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Fin de la parte 1</div>
+          <div style="font-size:13.5px;color:var(--text-soft);line-height:1.6;">Continúa con el <b>Prototipo 2</b> para ver cómo se crea un producto nuevo y se le asigna su taxonomía desde cero, importando un Excel, clonando otro producto, o construyéndola manualmente.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dots" id="dots"></div>
+  <div class="caption" id="caption"><div class="tag">PASO 1</div><div class="text" id="captionText">Bienvenida al recorrido.</div></div>
+  <div class="controls">
+    <div class="controls-left"><button class="btn-ghost" id="btnPrev">← Anterior</button><button class="btn-ghost" id="btnNext">Siguiente →</button></div>
+    <div class="controls-right"><button class="btn-play" id="btnPlay">▶ Reproducir automático</button></div>
+  </div>
+</div>
+
+<script>
+const steps = [
+  { tag:"INTRO", text:"Punto de partida del recorrido." },
+  { tag:"PASO 1", text:"El administrador entra a <b>Administración de líneas de negocio</b>. Cada línea se expande para mostrar sus productos — aquí, Créditos con sus 11 productos." },
+  { tag:"PASO 2", text:"Al presionar <b>Editar</b> en Crédito Automotriz se abre el detalle del producto. La sección 1 muestra su clasificación, y la sección 2 muestra la <b>tabla de documentos</b> que este producto requiere, con su tipo, si es requerido, su configuración de metadatos y OCR." },
+  { tag:"PASO 3", text:"Al presionar <b>+ Agregar documento</b> se abre un panel con dos pestañas. En la pestaña <b>Documento existente</b>, el administrador busca en el catálogo global y elige uno ya definido, configurando si es requerido y si tiene vigencia para este producto en particular." },
+  { tag:"PASO 4", text:"Si el documento que necesita no existe todavía, cambia a la pestaña <b>Documento nuevo</b>. Aquí aparece un formulario para capturarlo: nombre, tipo, y su configuración técnica (metadatos, OCR). Al guardar, el documento se crea en el catálogo global y queda vinculado a este producto en un solo paso." },
+  { tag:"PASO 5", text:"La tabla del producto se actualiza con el documento recién creado, marcado como <b>Nuevo</b>." },
+  { tag:"PASO 6", text:"El <b>Catálogo de documentos</b> es independiente de cualquier producto. Aquí se administra la configuración técnica de cada documento, y se ve en cuántos productos está siendo usado actualmente." },
+  { tag:"FIN", text:"Fin de esta parte del recorrido." }
+];
+let current=0, playing=false, timer=null;
+const dotsEl=document.getElementById('dots');
+steps.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.addEventListener('click',()=>goTo(i));dotsEl.appendChild(d);});
+function render(){
+  var scr=document.querySelectorAll('.screen');
+  for(var i=0;i<scr.length;i++){scr[i].classList.remove('show');}
+  document.querySelector('.screen[data-step="'+current+'"]').classList.add('show');
+  var dts=document.querySelectorAll('.dot');
+  for(var j=0;j<dts.length;j++){dts[j].classList.toggle('active', j===current);}
+  document.getElementById('stepNow').textContent=current+1;
+  document.getElementById('captionText').innerHTML=steps[current].text;
+  document.querySelector('.caption .tag').textContent=steps[current].tag;
+  document.getElementById('btnPrev').disabled=current===0;
+  document.getElementById('btnNext').disabled=current===steps.length-1;
+}
+function goTo(i){current=Math.max(0,Math.min(steps.length-1,i));render();if(current===steps.length-1)stopPlay();}
+document.getElementById('btnNext').addEventListener('click',()=>goTo(current+1));
+document.getElementById('btnPrev').addEventListener('click',()=>goTo(current-1));
+function startPlay(){playing=true;document.getElementById('btnPlay').textContent='⏸ Pausar';document.getElementById('btnPlay').classList.add('is-playing');timer=setInterval(()=>{if(current>=steps.length-1){stopPlay();return;}goTo(current+1);},4200);}
+function stopPlay(){playing=false;clearInterval(timer);document.getElementById('btnPlay').textContent='▶ Reproducir automático';document.getElementById('btnPlay').classList.remove('is-playing');}
+document.getElementById('btnPlay').addEventListener('click',()=>playing?stopPlay():startPlay());
+document.addEventListener('keydown',(e)=>{if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1);});
+render();
+</script>
+</body>
+</html>
