@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Prototipo 2 — Crear producto nuevo</title>
+<style>
+  :root{
+    --navy:#16233A; --blue:#2E86C1; --blue-dark:#236A9C; --blue-bg:#EAF3FB;
+    --green:#22A35E; --green-bg:#E8F8EF; --amber:#E8A33D; --amber-bg:#FEF3E2;
+    --page-bg:#F4F6F8; --border:#E4E8ED; --border-soft:#EEF1F4;
+    --text:#1F2937; --text-soft:#667085; --text-soft2:#9AA4B2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0F1B27;color:var(--text);}
+  .app{max-width:1220px;margin:0 auto;padding:22px 22px 90px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .brand{color:#fff;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;opacity:.65;}
+  .brand b{color:var(--blue);}
+  .step-counter{color:#fff;font-size:13px;opacity:.7;}
+
+  .stage{background:var(--page-bg);border-radius:10px;min-height:600px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .screen{position:absolute;top:0;right:0;bottom:0;left:0;display:none;}
+  .screen.show{display:block;}
+
+  .dots{display:flex;gap:6px;justify-content:center;margin:16px 0 10px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#3A4C5E;transition:.2s;cursor:pointer;}
+  .dot.active{background:var(--blue);width:20px;border-radius:4px;}
+
+  .caption{background:linear-gradient(180deg,#16242F,#0F1B27);border-radius:10px;margin-top:14px;padding:16px 20px;color:#fff;display:flex;gap:16px;align-items:flex-start;}
+  .caption .tag{flex:0 0 auto;background:var(--blue);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:5px;margin-top:1px;white-space:nowrap;}
+  .caption .text{font-size:13.5px;line-height:1.6;color:#E7ECF1;}
+  .caption .text b{color:#fff;}
+
+  .controls{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;}
+  .controls-left,.controls-right{display:flex;gap:8px;align-items:center;}
+  button{font-family:inherit;border:none;cursor:pointer;border-radius:7px;font-size:13px;font-weight:700;padding:10px 16px;transition:.15s;}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-ghost{background:#1E2E3D;color:#CBD5E1;}
+  .btn-ghost:hover{background:#28394A;}
+  .btn-ghost[disabled]{opacity:.35;cursor:not-allowed;}
+  .btn-play{background:var(--green);color:#fff;}
+  .btn-play.is-playing{background:var(--amber);}
+
+  .shell{display:flex;height:100%;}
+  .sidebar{width:60px;background:var(--navy);flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding-top:18px;gap:16px;}
+  .sb-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#7C8AA0;font-size:15px;}
+  .sb-ic.on{background:#fff;color:var(--navy);}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .header{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;}
+  .logo{font-size:20px;font-weight:800;color:var(--navy);font-style:italic;}
+  .user{display:flex;align-items:center;gap:10px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#D9E2EC;}
+  .user-meta{font-size:11.5px;line-height:1.4;color:var(--text-soft);}
+  .user-meta b{color:var(--text);font-size:12px;display:block;}
+  .logout{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:13px;}
+  .content{flex:1;overflow:auto;padding:24px 28px;}
+  .card{background:#fff;border-radius:12px;border:1px solid var(--border-soft);box-shadow:0 1px 3px rgba(16,24,40,.04);}
+
+  .crumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-soft);margin-bottom:6px;}
+  .crumb .back{width:24px;height:24px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .crumb a{color:var(--blue);font-weight:600;}
+  .crumb .sep{color:var(--text-soft2);}
+  .crumb .cur{color:var(--text);font-weight:700;}
+
+  .field-label{font-size:11.5px;color:var(--text-soft);margin-bottom:6px;font-weight:600;}
+  .field-input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);background:#fff;}
+  .field-grid{display:flex;gap:18px;margin-bottom:18px;}
+  .field-grid > div{flex:1;}
+  .sec-title{color:var(--blue);font-weight:800;font-size:14.5px;margin:0 0 14px;}
+
+  .opt3{display:flex;gap:16px;margin-top:6px;}
+  .opt3 .opt-card{flex:1;}
+  .opt-card{border:2px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center;background:#fff;cursor:pointer;}
+  .opt-card.sel{border-color:var(--blue);background:var(--blue-bg);}
+  .opt-card .ic{width:42px;height:42px;border-radius:10px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:19px;margin:0 auto 12px;}
+  .opt-card.sel .ic{background:var(--blue);color:#fff;}
+  .opt-card .t{font-size:13.5px;font-weight:800;color:var(--text);margin-bottom:5px;}
+  .opt-card .d{font-size:11.5px;color:var(--text-soft);line-height:1.5;}
+
+  .dropzone{border:2px dashed var(--border);border-radius:12px;padding:38px 20px;text-align:center;background:#FAFBFC;}
+  .dropzone .ic{font-size:30px;color:var(--blue);margin-bottom:10px;}
+  .dropzone .t{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .dropzone .d{font-size:11.5px;color:var(--text-soft2);}
+  .dl-example{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:9px 16px;border-radius:8px;margin-bottom:16px;}
+
+  table.tax{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.tax thead th{text-align:left;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft2);font-weight:800;padding:8px 10px;border-bottom:1.5px solid var(--border);}
+  table.tax tbody td{padding:9px 10px;border-bottom:1px solid var(--border-soft);color:var(--text);}
+  table.tax tbody tr.new-row{background:var(--green-bg);}
+  .doc-name{font-weight:700;}
+  .doc-type{color:var(--text-soft);}
+  .ok-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--green-bg);color:var(--green);}
+
+  /* Árbol de taxonomía */
+  .tree{display:flex;flex-direction:column;gap:1px;}
+  .t-row{display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:6px;}
+  .t-row:hover{background:#FAFBFC;}
+  .t-row.l1{padding-left:6px;}
+  .t-row.l2{padding-left:30px;}
+  .t-row.doc{padding-left:54px;}
+  .t-ic{font-size:13px;flex:0 0 auto;}
+  .t-ic.folder{color:#D6A325;}
+  .t-ic.doc{color:var(--text-soft2);}
+  .t-name{font-weight:800;color:var(--text);font-size:12.5px;}
+  .t-row.l2 .t-name{font-weight:700;font-size:12px;}
+  .t-row.doc .t-name{font-weight:600;}
+  .t-spacer{flex:1;min-width:8px;}
+  .t-link{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:4px 9px;border-radius:6px;white-space:nowrap;}
+  .t-link.new{color:var(--green);background:var(--green-bg);}
+  .t-doc-cluster{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .t-row.new-row{background:var(--green-bg);}
+  .t-row.new-folder-row{background:var(--green-bg);}
+  .tree-section{border-top:1px solid var(--border-soft);margin-top:4px;padding-top:10px;}
+
+  .alert-dup{display:flex;gap:12px;background:var(--amber-bg);border:1.5px solid #F2D19A;border-radius:9px;padding:13px 15px;margin-bottom:14px;}
+  .alert-dup-ic{color:var(--amber);font-size:17px;flex:0 0 auto;}
+  .alert-dup-title{font-size:12.5px;font-weight:800;color:#8A5A13;margin-bottom:3px;}
+  .alert-dup-text{font-size:11.5px;color:#8A5A13;line-height:1.55;}
+
+  .meta-chip{display:inline-block;background:#F0F3F7;color:var(--text-soft);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin:2px 3px 2px 0;}
+  .meta-chip.muted{color:var(--text-soft2);font-style:italic;}
+  .dup-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--amber-bg);color:#8A5A13;}
+  .new-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--blue-bg);color:var(--blue);}
+  tr.dup-row{background:#FFFBF3;}
+
+  .meta-editor{border:1px dashed var(--border);border-radius:8px;padding:10px 12px;margin-top:6px;}
+  .meta-editor .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .meta-chip-rm{background:#EAF0F5;color:var(--text);font-size:11px;font-weight:700;padding:4px 6px 4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:6px;}
+  .meta-chip-rm span{color:var(--text-soft2);font-weight:800;}
+  .add-chip{display:flex;gap:6px;}
+  .add-chip input{flex:1;border:1.5px solid var(--border);border-radius:6px;padding:6px 9px;font-size:11.5px;color:var(--text-soft2);background:#fff;}
+  .add-chip button{background:var(--blue-bg);color:var(--blue);font-size:11px;padding:6px 10px;border-radius:6px;}
+
+  .clone-pick{border:1.5px solid var(--border);border-radius:9px;padding:13px 16px;margin-bottom:9px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .clone-pick.sel{border-color:var(--blue);background:var(--blue-bg);}
+  .clone-pick .radio{width:17px;height:17px;border-radius:50%;border:2px solid #C7CFD8;flex:0 0 auto;}
+  .clone-pick.sel .radio{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff;}
+  .clone-pick .cn{font-size:13px;font-weight:700;color:var(--text);}
+  .clone-pick .ct{font-size:11px;color:var(--text-soft2);}
+
+  .preview-box{border:1.5px solid var(--border);border-radius:9px;padding:14px 16px;background:#FAFBFC;margin-top:14px;}
+  .preview-box .pt{font-size:11px;font-weight:800;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px;}
+
+  .two-col{display:flex;gap:20px;}
+  .two-col > div:first-child{flex:0 0 340px;}
+  .two-col > div:last-child{flex:1;min-width:0;}
+
+  .empty-state{border:2px dashed var(--border);border-radius:10px;padding:34px;text-align:center;color:var(--text-soft2);font-size:12.5px;}
+
+  .side-panel{position:absolute;top:0;right:0;bottom:0;width:420px;background:#fff;box-shadow:-8px 0 30px rgba(16,24,40,.12);padding:22px 24px;overflow:auto;}
+  .panel-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;}
+  .panel-sub{font-size:12px;color:var(--text-soft);margin-bottom:18px;}
+  .tabs{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:16px;}
+  .tab{flex:1;text-align:center;padding:10px 0;font-size:12.5px;font-weight:700;color:var(--text-soft2);border-bottom:2.5px solid transparent;cursor:pointer;}
+  .tab.active{color:var(--blue);border-color:var(--blue);}
+  .search-input{border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-soft);margin-bottom:12px;}
+  .catalog-pick{border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .catalog-pick.sel{border-color:var(--blue);background:var(--blue-bg);}
+  .catalog-pick .radio{width:16px;height:16px;border-radius:50%;border:2px solid #C7CFD8;}
+  .catalog-pick.sel .radio{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff;}
+  .catalog-pick .cn{font-size:12.5px;font-weight:700;}
+  .catalog-pick .ct{font-size:10.5px;color:var(--text-soft2);}
+  .config-box{border-top:1px dashed var(--border);margin-top:14px;padding-top:14px;}
+  .config-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:12.5px;}
+  .toggle-sw{width:36px;height:20px;border-radius:999px;background:#D8DEE5;position:relative;display:inline-block;}
+  .toggle-sw.on{background:var(--blue);}
+  .toggle-sw .knob{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;}
+  .toggle-sw.on .knob{left:18px;}
+  .panel-actions{display:flex;gap:10px;margin-top:20px;}
+  .panel-actions button{flex:1;}
+  .btn-cancel{background:#fff;border:1.5px solid var(--border);color:var(--text-soft);}
+  .btn-save{background:var(--blue);color:#fff;}
+
+  @media(max-width:760px){.app{padding:14px;} .stage{min-height:560px;} .opt3,.two-col{grid-template-columns:1fr;} .side-panel{width:100%;}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">DIGITALIZADOR · FASE 2 <b>· PROTOTIPO 2 — CREAR PRODUCTO NUEVO</b></div>
+    <div class="step-counter"><span id="stepNow">1</span> / <span id="stepTotal">12</span></div>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <div class="screen show" data-step="0">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff;">
+        <div style="max-width:480px;text-align:center;">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--blue);font-weight:800;margin-bottom:10px;">RECORRIDO GUIADO · PARTE 2</div>
+          <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Crear un producto nuevo y asignarle su taxonomía</div>
+          <div style="font-size:13.5px;color:var(--text-soft);line-height:1.6;">Este recorrido muestra las tres formas en que un administrador puede definir la taxonomía de un producto nuevo: importando un Excel, clonando otro producto, o construyéndola manualmente.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="1">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div><div class="user"><div class="avatar"></div><div class="user-meta"><b>José López Pérez</b>Lunes 20 de enero 2025</div><div class="logout">⏻</div></div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Administración de líneas de negocio</a><span class="sep">›</span><span class="cur">Nuevo producto</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Nuevo producto</h1>
+            <div class="card" style="padding:24px;margin-bottom:18px;">
+              <div class="sec-title">1. Clasificación</div>
+              <div class="field-grid">
+                <div><div class="field-label">Línea de negocio</div><div class="field-input">Créditos</div></div>
+                <div><div class="field-label">Nombre del producto</div><div class="field-input">Crédito PYME</div></div>
+              </div>
+            </div>
+            <div class="card" style="padding:24px;">
+              <div class="sec-title">2. Asignar taxonomía de documentos</div>
+              <div class="opt3">
+                <div class="opt-card sel"><div class="ic">📥</div><div class="t">Importar Excel</div><div class="d">Subir un archivo con la estructura de documentos ya definida.</div></div>
+                <div class="opt-card"><div class="ic">⎘</div><div class="t">Clonar de otro producto</div><div class="d">Copiar la taxonomía completa de un producto existente.</div></div>
+                <div class="opt-card"><div class="ic">✎</div><div class="t">Construir manualmente</div><div class="d">Armar la taxonomía desde cero, documento por documento.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="2">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Importar Excel</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Importar taxonomía desde Excel</h1>
+            <div class="card" style="padding:24px;">
+              <div class="dl-example">⬇ Descargar ejemplo del formato (.xlsx)</div>
+              <div class="dropzone">
+                <div class="ic">⬆</div>
+                <div class="t">Arrastra tu archivo aquí, o haz clic para buscarlo</div>
+                <div class="d">Formato .xlsx según la plantilla de ejemplo · máx. 5 MB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="3">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Importar Excel</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Vista previa del archivo</h1>
+            <div class="card" style="padding:24px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--green-bg);padding:10px 14px;border-radius:8px;">
+                <span style="color:var(--green);font-weight:800;">✓</span>
+                <span style="font-size:12.5px;color:var(--text);"><b>taxonomia_credito_pyme.xlsx</b> — 12 documentos detectados, sin errores de formato</span>
+              </div>
+              <div class="alert-dup">
+                <span class="alert-dup-ic">⚠</span>
+                <div>
+                  <div class="alert-dup-title">1 documento ya existe en el catálogo</div>
+                  <div class="alert-dup-text"><b>Identificación Oficial</b> coincide con un documento ya registrado, usado en 11 productos. Se usará la versión existente del catálogo — su configuración de metadatos y OCR <b>no se sobrescribirá</b>, para no afectar a los productos que ya la usan.</div>
+                </div>
+              </div>
+              <div style="font-size:10px;font-weight:800;color:var(--text-soft2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Estructura detectada en el archivo</div>
+              <div class="tree" style="margin-top:4px;">
+                <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span></div>
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span></div>
+                <div class="t-row doc dup-row"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="ok-pill">Sí</span><span class="meta-chip">Vigencia</span><span class="meta-chip">Tipo de ID</span><span class="dup-pill">Ya existe</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Acta Constitutiva</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="ok-pill">Sí</span><span class="meta-chip">Número de escritura</span><span class="meta-chip">Notario</span><span class="new-pill">Nuevo</span></div>
+                </div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Estados Financieros</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="ok-pill">Sí</span><span class="meta-chip">Periodo</span><span class="meta-chip">Moneda</span><span class="new-pill">Nuevo</span></div>
+                </div>
+                <div class="t-row l2 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Documentación del Garante</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Comprobante de domicilio</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="ok-pill">Sí</span><span class="meta-chip muted">Sin metadatos</span><span class="new-pill">Nuevo</span></div>
+                </div>
+                <div class="t-row l1 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Expediente Legal</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Solicitud de Crédito</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="ok-pill">Sí</span><span class="meta-chip muted">Sin metadatos</span><span class="new-pill">Nuevo</span></div>
+                </div>
+              </div>
+              <div style="text-align:right;margin-top:16px;"><button class="btn-primary" style="border-radius:8px;">Usar esta taxonomía</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="4">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Clonar de otro producto</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Clonar taxonomía existente</h1>
+            <div class="card" style="padding:24px;">
+              <div class="two-col">
+                <div>
+                  <div class="search-input" style="margin-bottom:14px;">🔍 Buscar producto...</div>
+                  <div class="clone-pick sel"><div class="radio"></div><div><div class="cn">Crédito Simple sin Garantía</div><div class="ct">Créditos · 8 documentos</div></div></div>
+                  <div class="clone-pick"><div class="radio"></div><div><div class="cn">Crédito Automotriz</div><div class="ct">Créditos · 6 documentos</div></div></div>
+                  <div class="clone-pick"><div class="radio"></div><div><div class="cn">Línea Crédito Prendario</div><div class="ct">Créditos · 9 documentos</div></div></div>
+                </div>
+                <div class="preview-box">
+                  <div class="pt">Se copiará esta estructura completa</div>
+                  <div class="tree">
+                    <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span></div>
+                    <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span></div>
+                    <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span><span class="ok-pill">Requerido</span></div>
+                    <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Comprobante de domicilio</span><span class="t-spacer"></span><span class="ok-pill">Requerido</span></div>
+                    <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Estados de Cuenta (3 meses)</span><span class="t-spacer"></span><span class="ok-pill">Requerido</span></div>
+                    <div class="t-row l2 tree-section"><span class="t-ic folder">📁</span><span class="t-name">02. Documentación del Garante</span></div>
+                    <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Buró de Crédito</span><span class="t-spacer"></span><span style="font-size:10px;color:var(--text-soft2);font-weight:700;">Opcional</span></div>
+                  </div>
+                  <div style="text-align:right;margin-top:14px;"><button class="btn-primary" style="border-radius:8px;">Clonar esta taxonomía</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="5">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Construir manualmente</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Taxonomía de Crédito PYME</h1>
+            <div class="card" style="padding:24px;">
+              <div class="empty-state">Aún no se ha creado ninguna carpeta. Empieza creando la primera carpeta de la taxonomía.</div>
+              <div style="text-align:right;margin-top:16px;"><button class="btn-primary" style="border-radius:8px;">+ Nueva carpeta</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="6">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Construir manualmente</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Taxonomía de Crédito PYME</h1>
+            <div class="card" style="padding:24px;">
+              <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>Taxonomía <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 1 carpeta raíz · sin documentos</span></span>
+                <button class="pill-btn outline" style="font-size:11.5px;padding:7px 14px;">+ Nueva carpeta</button>
+              </div>
+              <div class="tree">
+                <div class="t-row l1 new-folder-row"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General <span class="badge new" style="margin-left:4px;">Nueva</span></span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row l2 new-folder-row"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado <span class="badge new" style="margin-left:4px;">Nueva</span></span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link new">+ Documento</span></div>
+                <div class="t-row" style="padding-left:54px;"><span style="font-size:11.5px;color:var(--text-soft2);font-style:italic;">Carpeta vacía — agrega un documento para empezar.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="7">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Taxonomía de Crédito PYME</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Crédito PYME <span style="color:var(--text-soft2);">/</span> Carpeta: <b>01. Documentación del Acreditado</b></div>
+        <div class="tabs"><div class="tab active">Documento existente</div><div class="tab">Documento nuevo</div></div>
+        <div class="search-input">🔍 Buscar en el catálogo...</div>
+        <div class="catalog-pick sel"><div class="radio"></div><div><div class="cn">Identificación Oficial</div><div class="ct">Identificación · usado en 11 productos</div></div></div>
+        <div class="catalog-pick"><div class="radio"></div><div><div class="cn">Acta Constitutiva</div><div class="ct">Legal · usado en 5 productos</div></div></div>
+        <div class="config-box">
+          <div class="field-label" style="margin-bottom:8px;">Configuración para esta carpeta</div>
+          <div class="config-row"><span>Requerido</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+        </div>
+        <div class="panel-actions"><button class="btn-cancel">Cancelar</button><button class="btn-save">Vincular documento</button></div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="8">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Taxonomía de Crédito PYME</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Crédito PYME <span style="color:var(--text-soft2);">/</span> Carpeta: <b>01. Documentación del Acreditado</b></div>
+        <div class="tabs"><div class="tab">Documento existente</div><div class="tab active">Documento nuevo</div></div>
+        <div class="field-label">Nombre del documento</div>
+        <div class="field-input" style="margin-bottom:10px;border-color:#F2D19A;">Buró de Crédito</div>
+        <div class="alert-dup" style="margin-bottom:0;">
+          <span class="alert-dup-ic">⚠</span>
+          <div>
+            <div class="alert-dup-title">Documento similar encontrado</div>
+            <div class="alert-dup-text">Ya existe <b>"Buró de Crédito"</b> en el catálogo, usado en 3 productos. Para no afectar a esos productos, su configuración no puede modificarse desde aquí.</div>
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-cancel" style="flex:1;">Es otro documento, continuar</button>
+          <button class="btn-save" style="flex:1;">Usar el existente</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="9">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main" style="filter:blur(1.5px);">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content"><h1>Taxonomía de Crédito PYME</h1></div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="panel-title">Agregar documento</div>
+        <div class="panel-sub">Crédito PYME <span style="color:var(--text-soft2);">/</span> Carpeta: <b>01. Documentación del Acreditado</b></div>
+        <div class="tabs"><div class="tab">Documento existente</div><div class="tab active">Documento nuevo</div></div>
+        <div class="field-label">Nombre del documento</div>
+        <div class="field-input" style="margin-bottom:6px;border-color:var(--green);">Buró de Crédito del Aval</div>
+        <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:14px;">✓ No hay coincidencias en el catálogo</div>
+        <div class="field-label">Tipo de documento</div>
+        <div class="field-input" style="margin-bottom:14px;display:flex;justify-content:space-between;">Bancario <span style="color:var(--text-soft2);">⌄</span></div>
+        <div class="config-box" style="margin-top:6px;">
+          <div class="field-label" style="margin-bottom:8px;">Configuración del documento</div>
+          <div class="config-row"><span>Requiere metadatos</span><span class="toggle-sw on"><span class="knob"></span></span></div>
+          <div class="meta-editor">
+            <div class="chips">
+              <span class="meta-chip-rm">Institución <span>✕</span></span>
+              <span class="meta-chip-rm">Fecha de consulta <span>✕</span></span>
+            </div>
+            <div class="add-chip"><input placeholder="Nombre del campo..."/><button>+ Agregar</button></div>
+          </div>
+          <div class="config-row"><span>Requiere OCR</span><span class="toggle-sw"><span class="knob"></span></span></div>
+        </div>
+        <div class="config-box">
+          <div class="field-label" style="margin-bottom:8px;">Configuración para esta carpeta</div>
+          <div class="config-row"><span>Requerido</span><span class="toggle-sw"><span class="knob"></span></span></div>
+        </div>
+        <div class="panel-actions"><button class="btn-cancel">Cancelar</button><button class="btn-save">Crear y vincular</button></div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="10">
+      <div class="shell">
+        <div class="sidebar"><div class="sb-ic on">⌂</div><div class="sb-ic">🖶</div><div class="sb-ic">＋</div><div class="sb-ic">⚙</div></div>
+        <div class="main">
+          <div class="header"><div class="logo">Actinver</div></div>
+          <div class="content">
+            <div class="crumb"><div class="back">←</div><a>Nuevo producto</a><span class="sep">›</span><span class="cur">Construir manualmente</span></div>
+            <h1 style="margin:6px 0 16px;font-size:20px;">Taxonomía de Crédito PYME</h1>
+            <div class="card" style="padding:24px;">
+              <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>Taxonomía <span style="color:var(--text-soft2);font-weight:600;font-size:11.5px;">· 2 carpetas raíz · 2 documentos</span></span>
+                <button class="pill-btn outline" style="font-size:11.5px;padding:7px 14px;">+ Nueva carpeta</button>
+              </div>
+              <div class="tree">
+                <div class="t-row l1"><span class="t-ic folder">📁</span><span class="t-name">01. Expediente General</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row l2"><span class="t-ic folder">📁</span><span class="t-name">01. Documentación del Acreditado</span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link">+ Documento</span></div>
+                <div class="t-row doc"><span class="t-ic doc">📄</span><span class="t-name">Identificación Oficial</span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw on"><span class="knob"></span></span><span class="ocr-pill on">Habilitado</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row doc new-row"><span class="t-ic doc">📄</span><span class="t-name">Buró de Crédito del Aval <span class="badge new" style="margin-left:4px;">Nuevo</span></span><span class="t-spacer"></span>
+                  <div class="t-doc-cluster"><span class="toggle-sw"><span class="knob"></span></span><span class="link-meta">Configurado</span><span class="ocr-pill off">No aplica</span><span class="row-actions">✎ 🗑</span></div>
+                </div>
+                <div class="t-row l1 tree-section new-folder-row"><span class="t-ic folder">📁</span><span class="t-name">02. Expediente Legal <span class="badge new" style="margin-left:4px;">Nueva</span></span><span class="t-spacer"></span><span class="t-link">+ Carpeta</span><span class="t-link new">+ Documento</span></div>
+                <div class="t-row" style="padding-left:54px;"><span style="font-size:11.5px;color:var(--text-soft2);font-style:italic;">Carpeta vacía — lista para su primer documento.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" data-step="11">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff;">
+        <div style="max-width:480px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Fin del recorrido</div>
+          <div style="font-size:13.5px;color:var(--text-soft);line-height:1.6;">Las tres formas de asignar taxonomía a un producto nuevo —importar, clonar o construir— terminan en el mismo lugar: un árbol de carpetas y documentos editable, igual al que viste en el Prototipo 1.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dots" id="dots"></div>
+  <div class="caption" id="caption"><div class="tag">PASO 1</div><div class="text" id="captionText">Bienvenida.</div></div>
+  <div class="controls">
+    <div class="controls-left"><button class="btn-ghost" id="btnPrev">← Anterior</button><button class="btn-ghost" id="btnNext">Siguiente →</button></div>
+    <div class="controls-right"><button class="btn-play" id="btnPlay">▶ Reproducir automático</button></div>
+  </div>
+</div>
+
+<script>
+const steps = [
+  { tag:"INTRO", text:"Punto de partida de este segundo recorrido." },
+  { tag:"PASO 1", text:"El administrador captura los datos básicos del producto y elige cómo va a asignarle su taxonomía: <b>importar un Excel</b>, <b>clonar otro producto</b>, o <b>construirla manualmente</b>." },
+  { tag:"PASO 2 · OPCIÓN 1", text:"Al elegir <b>Importar Excel</b>, el sistema ofrece primero un archivo de ejemplo descargable con el formato esperado, y después una zona para arrastrar o seleccionar el archivo ya lleno." },
+  { tag:"PASO 3 · OPCIÓN 1", text:"Al subir el archivo, se muestra la vista previa como <b>árbol de carpetas</b>, con los metadatos que cada documento requiere. El sistema también detecta si algún documento ya existe en el catálogo: en ese caso se usará la versión ya registrada, sin sobrescribir su configuración." },
+  { tag:"PASO 4 · OPCIÓN 2", text:"Al elegir <b>Clonar de otro producto</b>, el administrador busca y selecciona un producto ya existente. A la derecha se previsualiza la <b>estructura completa de carpetas</b> que se copiará, antes de confirmar." },
+  { tag:"PASO 5 · OPCIÓN 3", text:"Al elegir <b>Construir manualmente</b>, el producto inicia sin ninguna carpeta. El administrador empieza creando la primera con <b>+ Nueva carpeta</b> — el mismo botón disponible en cualquier nivel del árbol." },
+  { tag:"PASO 6 · OPCIÓN 3", text:"Se crearon dos niveles: '01. Expediente General' y, dentro de ella, '01. Documentación del Acreditado'. Esta carpeta está vacía — el siguiente paso es agregarle su primer documento con <b>+ Documento</b>." },
+  { tag:"PASO 7 · OPCIÓN 3", text:"El panel para agregar documento es el mismo que ya viste en el Prototipo 1, ahora con el contexto de la carpeta seleccionada. Puede tomar un documento <b>existente</b> del catálogo, o cambiar a la pestaña para crear uno <b>nuevo</b>." },
+  { tag:"PASO 8 · OPCIÓN 3", text:"Si el nombre capturado coincide con uno que ya existe en el catálogo, el sistema lo <b>detecta y avisa de inmediato</b>. El administrador puede usar el documento existente, o continuar si en verdad se trata de un documento distinto." },
+  { tag:"PASO 9 · OPCIÓN 3", text:"Al continuar con un nombre sin coincidencias, el formulario se completa con el tipo de documento y, si requiere metadatos, el administrador define <b>qué campos</b> se van a capturar." },
+  { tag:"PASO 10 · OPCIÓN 3", text:"El árbol se actualiza con ambos documentos dentro de su carpeta. En paralelo, el administrador ya creó una segunda carpeta raíz, '02. Expediente Legal', lista para su primer documento — demostrando que <b>+ Carpeta</b> y <b>+ Documento</b> funcionan en cualquier nivel, las veces que se necesiten." },
+  { tag:"FIN", text:"Fin del recorrido." }
+];
+let current=0, playing=false, timer=null;
+const dotsEl=document.getElementById('dots');
+steps.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.addEventListener('click',()=>goTo(i));dotsEl.appendChild(d);});
+function render(){
+  var scr=document.querySelectorAll('.screen');
+  for(var i=0;i<scr.length;i++){scr[i].classList.remove('show');}
+  document.querySelector('.screen[data-step="'+current+'"]').classList.add('show');
+  var dts=document.querySelectorAll('.dot');
+  for(var j=0;j<dts.length;j++){dts[j].classList.toggle('active', j===current);}
+  document.getElementById('stepNow').textContent=current+1;
+  document.getElementById('captionText').innerHTML=steps[current].text;
+  document.querySelector('.caption .tag').textContent=steps[current].tag;
+  document.getElementById('btnPrev').disabled=current===0;
+  document.getElementById('btnNext').disabled=current===steps.length-1;
+}
+function goTo(i){current=Math.max(0,Math.min(steps.length-1,i));render();if(current===steps.length-1)stopPlay();}
+document.getElementById('btnNext').addEventListener('click',()=>goTo(current+1));
+document.getElementById('btnPrev').addEventListener('click',()=>goTo(current-1));
+function startPlay(){playing=true;document.getElementById('btnPlay').textContent='⏸ Pausar';document.getElementById('btnPlay').classList.add('is-playing');timer=setInterval(()=>{if(current>=steps.length-1){stopPlay();return;}goTo(current+1);},4200);}
+function stopPlay(){playing=false;clearInterval(timer);document.getElementById('btnPlay').textContent='▶ Reproducir automático';document.getElementById('btnPlay').classList.remove('is-playing');}
+document.getElementById('btnPlay').addEventListener('click',()=>playing?stopPlay():startPlay());
+document.addEventListener('keydown',(e)=>{if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1);});
+render();
+</script>
+</body>
+</html>
